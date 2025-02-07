@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    name: Build release
+    runs-on: ubuntu-24.04
+
+    env:
+      MIX_ENV: prod
+      TAG: ${{ github.event.release.tag_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        id: setup-beam
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Restore cached dependencies and build artifacts
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            deps
+            _build
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.erlang-version }}-${{ hashFiles('**/mix.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mix deps.get
+          mix deps.compile
+          mix deps.unlock --check-unused
+
+      - name: Run static checks
+        run: |
+          mix format --check-formatted
+
+      - name: Compile sources
+        run: mix compile --warnings-as-errors
+
+      - name: Build release
+        run: |
+          mix release
+          cd _build/${MIX_ENV}/rel/auto_updater_testapp
+          tar zxf tmp/auto_updater_testapp-${TAG#v}.tar.gz *
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: /tmp/auto_updater_testapp-${TAG#v}.tar.gz
+
