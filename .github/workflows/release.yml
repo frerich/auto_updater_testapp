@@ -47,13 +47,10 @@ jobs:
         run: mix compile --warnings-as-errors
 
       - name: Build release
-        run: |
-          mix release
-          cd _build/${MIX_ENV}/rel/auto_updater_testapp
-          tar zxf tmp/auto_updater_testapp-${TAG#v}.tar.gz *
+        run: mix release
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: /tmp/auto_updater_testapp-${TAG#v}.tar.gz
+          files: _build/${MIX_ENV}/auto_updater_testapp-${TAG#v}.tar.gz
 
