@@ -27,7 +27,7 @@ defmodule AutoUpdaterTestapp.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:auto_updater, git: "https://github.com/frerich/auto_updater"}
+      {:auto_updater, github: "frerich/auto_updater"}
     ]
   end
 end
