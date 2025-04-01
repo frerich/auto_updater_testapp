@@ -47,10 +47,14 @@ jobs:
         run: mix compile --warnings-as-errors
 
       - name: Build release
-        run: mix release
+        id: release
+        run: |
+          mix release
+          echo "TARBALL=_build/${MIX_ENV}/auto_updater_testapp-${TAG#v}.tar.gz" >> "$GITHUB_OUTPUT"
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: _build/${MIX_ENV}/auto_updater_testapp-${TAG#v}.tar.gz
+          token: ${{ secrets.RELEASE_TOKEN }}
+          files: ${{ steps.release.TARBALL }}
 
