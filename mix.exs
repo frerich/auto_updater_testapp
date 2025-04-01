@@ -4,7 +4,7 @@ defmodule AutoUpdaterTestapp.MixProject do
   def project do
     [
       app: :auto_updater_testapp,
-      version: "0.1.0",
+      version: version(),
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -29,5 +29,10 @@ defmodule AutoUpdaterTestapp.MixProject do
     [
       {:auto_updater, github: "frerich/auto_updater"}
     ]
+  end
+
+  defp version do
+    {<<"v", rest::binary>>, 0} = System.cmd("git", ["describe", "--tags"])
+    String.trim(rest)
   end
 end
